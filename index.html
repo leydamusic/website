@@ -17,17 +17,9 @@
       padding: 0;
       height: 100%;
       font-family: 'Aspekta', sans-serif;
+      background: black;
+      color: white;
       transition: background 2s ease, color 2s ease;
-    }
-
-    body.black-start {
-      background: #000;
-      color: #fff;
-    }
-
-    body.white-end {
-      background: #fff;
-      color: #000;
     }
 
     .container {
@@ -35,19 +27,19 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: 100%;
-      opacity: 0;
-      animation: fadeIn 2s ease forwards 1s;
+      height: 100vh;
+      opacity: 1;
+      animation: fadeIn 2s ease forwards;
     }
 
     .logo {
       width: 250px;
       max-width: 70vw;
+      margin-bottom: 1.5rem;
       transition: filter 2s ease;
     }
 
     .coming-text {
-      margin-top: 1.5rem;
       font-size: 1.4rem;
       font-weight: 800;
       letter-spacing: 1px;
@@ -56,41 +48,37 @@
     }
 
     @keyframes fadeIn {
-      to {
+      0% {
+        opacity: 0;
+      }
+      100% {
         opacity: 1;
       }
     }
 
-    .fade-to-white {
-      animation: bgToWhite 3s ease 2s forwards;
+    /* Add white-end class to trigger full site transition */
+    body.white-end {
+      background: white;
+      color: black;
     }
 
-    @keyframes bgToWhite {
-      to {
-        background-color: #fff;
-        color: #000;
-      }
+    body.white-end .coming-text {
+      color: black;
     }
   </style>
 </head>
-<body class="black-start">
-  <div class="container fade-to-white">
+<body>
+  <div class="container">
     <img id="logo" class="logo" src="BigSkyMusic_white_transparent.png" alt="Big Sky Music Logo" />
-    <div class="coming-text" id="coming-text">Coming in January 2026</div>
+    <div id="coming-text" class="coming-text">Coming in January 2026</div>
   </div>
 
   <script>
     setTimeout(() => {
-      document.body.classList.remove("black-start");
       document.body.classList.add("white-end");
 
-      // Switch to black logo
       const logo = document.getElementById("logo");
       logo.src = "BigSkyMusic_transparent.png";
-
-      // Switch text color to black
-      const text = document.getElementById("coming-text");
-      text.style.color = "#000";
     }, 2500);
   </script>
 </body>
