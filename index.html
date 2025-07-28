@@ -4,7 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Big Sky Music Company</title>
-  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+
+  <!-- Favicon for Light & Dark Mode -->
+  <link rel="icon" href="favicon-light.ico" media="(prefers-color-scheme: light)">
+  <link rel="icon" href="favicon-dark.ico" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="favicon-light.ico" type="image/x-icon" />
 
   <!-- Aspekta font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -23,74 +27,87 @@
       font-family: 'Aspekta', sans-serif;
       background: black;
       color: white;
-      transition: background 2s ease, color 2s ease;
+      overflow: hidden;
     }
 
-    .container {
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      flex-direction: column;
+      opacity: 0;
+      transition: opacity 2s ease;
+    }
+
+    #splash {
+      background: black;
+      z-index: 2;
       opacity: 1;
-      animation: fadeIn 2s ease forwards;
-      text-align: center;
+    }
+
+    #main {
+      background: white;
+      color: black;
+      z-index: 1;
     }
 
     .logo {
-      width: 350px;
       max-width: 80vw;
-      margin-bottom: 0;
-      transition: width 0.5s ease;
+      transition: transform 1s ease;
+    }
+
+    #splash-logo {
+      width: 350px;
+    }
+
+    #main-logo {
+      width: 250px;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      transition: opacity 2s ease;
     }
 
     .coming-text {
-      margin-top: 1.5rem;
       font-size: 1.4rem;
       font-weight: 800;
       letter-spacing: 1px;
       color: black;
-      transition: color 2s ease, opacity 1s ease;
       opacity: 0;
-    }
-
-    @keyframes fadeIn {
-      0% {
-        opacity: 0;
-      }
-      100% {
-        opacity: 1;
-      }
-    }
-
-    body.white-end {
-      background: white;
-      color: black;
-    }
-
-    body.white-end .coming-text {
-      opacity: 1;
+      transition: opacity 2s ease;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <img id="logo" class="logo" src="BigSkyMusic_white_transparent.png" alt="Big Sky Music Logo" />
-    <div id="coming-text" class="coming-text">Coming in January 2026</div>
+
+  <!-- Splash Screen -->
+  <div id="splash" class="screen">
+    <img id="splash-logo" class="logo" src="BigSkyMusic_white_transparent.png" alt="Big Sky Music Logo" />
+  </div>
+
+  <!-- Main Screen -->
+  <div id="main" class="screen">
+    <img id="main-logo" class="logo" src="BigSkyMusic_transparent.png" alt="Big Sky Music Logo" />
+    <div class="coming-text" id="coming-text">Coming in January 2026</div>
   </div>
 
   <script>
-    // After 4 seconds, transition to main view
     setTimeout(() => {
-      document.body.classList.add("white-end");
+      // Fade out splash
+      document.getElementById("splash").style.opacity = 0;
 
-      const logo = document.getElementById("logo");
-      logo.src = "BigSkyMusic_transparent.png";
-      logo.style.width = "250px"; // shrink slightly for main screen
+      // After splash fades out, fade in main content
+      setTimeout(() => {
+        document.getElementById("main").style.opacity = 1;
+        document.getElementById("main-logo").style.opacity = 1;
+        document.getElementById("coming-text").style.opacity = 1;
+      }, 2000); // Wait for splash to fade out fully
 
-      const text = document.getElementById("coming-text");
-      text.style.opacity = "1";
-    }, 4000); // 4 seconds
+    }, 4000); // Initial delay before starting transition
   </script>
 </body>
 </html>
