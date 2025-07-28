@@ -4,9 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Big Sky Music Company</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+
+  <!-- Aspekta font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Aspekta:wght@800&display=swap" rel="stylesheet" />
+
   <style>
     * {
       box-sizing: border-box;
@@ -30,21 +34,24 @@
       height: 100vh;
       opacity: 1;
       animation: fadeIn 2s ease forwards;
+      text-align: center;
     }
 
     .logo {
-      width: 250px;
-      max-width: 70vw;
-      margin-bottom: 1.5rem;
-      transition: filter 2s ease;
+      width: 350px;
+      max-width: 80vw;
+      margin-bottom: 0;
+      transition: width 0.5s ease;
     }
 
     .coming-text {
+      margin-top: 1.5rem;
       font-size: 1.4rem;
       font-weight: 800;
       letter-spacing: 1px;
-      color: white;
-      transition: color 2s ease;
+      color: black;
+      transition: color 2s ease, opacity 1s ease;
+      opacity: 0;
     }
 
     @keyframes fadeIn {
@@ -56,14 +63,13 @@
       }
     }
 
-    /* Add white-end class to trigger full site transition */
     body.white-end {
       background: white;
       color: black;
     }
 
     body.white-end .coming-text {
-      color: black;
+      opacity: 1;
     }
   </style>
 </head>
@@ -74,12 +80,17 @@
   </div>
 
   <script>
+    // After 4 seconds, transition to main view
     setTimeout(() => {
       document.body.classList.add("white-end");
 
       const logo = document.getElementById("logo");
       logo.src = "BigSkyMusic_transparent.png";
-    }, 2500);
+      logo.style.width = "250px"; // shrink slightly for main screen
+
+      const text = document.getElementById("coming-text");
+      text.style.opacity = "1";
+    }, 4000); // 4 seconds
   </script>
 </body>
 </html>
