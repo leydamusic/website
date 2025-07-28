@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coming Soon</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Helvetica Neue', sans-serif;
+      transition: background 2s ease, color 2s ease;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      opacity: 0;
+      animation: fadeIn 2s ease forwards 1s;
+    }
+
+    .logo {
+      width: 200px;
+      max-width: 60vw;
+      transition: filter 2s ease;
+    }
+
+    .coming-text {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      letter-spacing: 1px;
+      transition: color 2s ease;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    body.black-start {
+      background: #000;
+      color: #fff;
+    }
+
+    body.white-end {
+      background: #fff;
+      color: #000;
+    }
+
+    /* optional fade-to-white effect */
+    .fade-to-white {
+      animation: bgToWhite 3s ease 2s forwards;
+    }
+
+    @keyframes bgToWhite {
+      to {
+        background-color: #fff;
+        color: #000;
+      }
+    }
+  </style>
+</head>
+<body class="black-start">
+
+  <div class="container fade-to-white">
+    <img id="logo" class="logo" src="white-logo.png" alt="Logo" />
+    <div class="coming-text">Coming in January 2026</div>
+  </div>
+
+  <script>
+    // After 2.5s switch the logo to black version
+    setTimeout(() => {
+      document.body.classList.remove("black-start");
+      document.body.classList.add("white-end");
+      const logo = document.getElementById("logo");
+      logo.src = "black-logo.png";
+    }, 2500);
+  </script>
+</body>
+</html>
