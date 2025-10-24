@@ -20,76 +20,81 @@
     html, body {
       margin: 0; padding: 0; height: 100%;
       font-family: 'Aspekta', sans-serif;
-      background: black; color: white;
+      background: #000; color: #fff;
       overflow: hidden;
     }
 
-    /* ---------- SPLASH (deeper black with subtle white shimmer) ---------- */
-    .splash-bg {
-      position: fixed; inset: 0; z-index: 0;
-      background: #000;
-    }
-    /* White shimmer via SVG turbulence, extremely subtle */
-    .splash-shimmer {
+    /* ---------- SPLASH: deep black + pronounced shimmer ---------- */
+    .splash-bg { position: fixed; inset: 0; z-index: 0; background: #000; }
+
+    /* Layer 1: smooth caustic ripples */
+    .splash-shimmer,
+    .splash-shimmer-2 {
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      opacity: .06; /* keep this very low */
-      filter: contrast(130%) brightness(120%);
       mix-blend-mode: screen;
     }
+    .splash-shimmer { opacity: .14; filter: brightness(1.15) contrast(1.25); }
+    .splash-shimmer-2 { opacity: .08; filter: brightness(1.1) contrast(1.2); }
 
-    /* ---------- SCREEN LAYERS ---------- */
+    /* ---------- SCREENS ---------- */
     .screen {
       position: absolute; inset: 0; z-index: 1;
       display: grid; place-items: center;
-      opacity: 0; transition: opacity 1.4s ease;
+      opacity: 0; transition: opacity 1.2s ease;
     }
     #splash { z-index: 2; opacity: 1; }
     #main   { background: #fff; color: #000; z-index: 1; }
     #main::before{
-      /* ultra-subtle texture so glass blur has something to catch on */
       content:""; position: absolute; inset:0; z-index:0; pointer-events:none;
       background:
-        radial-gradient(800px 600px at 20% 20%, rgba(0,0,0,.05), transparent 60%),
-        radial-gradient(900px 700px at 80% 30%, rgba(0,0,0,.04), transparent 65%),
+        radial-gradient(800px 600px at 25% 25%, rgba(0,0,0,.06), transparent 60%),
+        radial-gradient(900px 700px at 75% 35%, rgba(0,0,0,.05), transparent 65%),
         radial-gradient(900px 700px at 40% 90%, rgba(0,0,0,.04), transparent 65%),
         #fff;
     }
 
-    /* ---------- BASE GLASS PANEL (used on splash only) ---------- */
+    /* ---------- GLASS (SPLASH): clear glass with edge refraction ---------- */
     .panel {
       position: relative;
-      border-radius: 20px;
+      border-radius: 22px;
       padding: clamp(24px, 4vw, 40px);
-      background:
-        linear-gradient(to bottom, rgba(255,255,255,.10), rgba(255,255,255,0)),
-        rgba(20,20,22,.18);
-      -webkit-backdrop-filter: saturate(160%) blur(var(--blur, 20px));
-              backdrop-filter: saturate(160%) blur(var(--blur, 20px));
-      border: 1px solid rgba(255,255,255,.35);
-      box-shadow: 0 10px 28px rgba(0,0,0,.18), 0 2px 10px rgba(0,0,0,.10);
-      transform-style: preserve-3d;
+      /* IMPORTANT: keep a tiny alpha so backdrop-filter engages, but visually clear */
+      background: rgba(255,255,255,.02);
+      -webkit-backdrop-filter: blur(10px) saturate(160%);
+              backdrop-filter: blur(10px) saturate(160%);
+      border: 1px solid rgba(255,255,255,.28);
+      box-shadow:
+        0 18px 40px rgba(0,0,0,.28),
+        0 2px 10px rgba(0,0,0,.18);
       overflow: clip;
     }
+    /* Edge refraction/highlight: inner glow + conic sparkle */
     .panel::before,
     .panel::after {
       content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
     }
-    .panel::before { background: linear-gradient(to bottom, rgba(255,255,255,.45), transparent 40%); mix-blend-mode: screen; opacity: .55; }
-    .panel::after  { box-shadow: inset 0 0 0 1px rgba(255,255,255,.50); opacity: .85; }
-
-    /* Pointer-follow sheen (never blocks clicks) */
-    .sheen {
-      position: absolute; inset: -20%;
-      background: radial-gradient(140px 100px at var(--mx,70%) var(--my,10%), rgba(255,255,255,.45), transparent 60%);
-      filter: blur(18px);
-      opacity: .18; pointer-events: none;
-      transition: opacity .25s ease;
-      will-change: transform, opacity;
+    .panel::before {
+      /* inner bright edge */
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.45),
+        inset 0 12px 40px rgba(255,255,255,.08),
+        inset 0 -12px 40px rgba(255,255,255,.06);
     }
-    .panel:hover .sheen { opacity: .28; }
+    .panel::after {
+      /* subtle chromatic gleam along the rim */
+      background:
+        conic-gradient(from 0deg at 50% 50%,
+          rgba(255,255,255,.28) 0deg,
+          rgba(255,255,255,0) 70deg,
+          rgba(255,255,255,.22) 140deg,
+          rgba(255,255,255,0) 210deg,
+          rgba(255,255,255,.24) 300deg,
+          rgba(255,255,255,0) 360deg);
+      mix-blend-mode: screen;
+      opacity: .45;
+    }
 
-    /* ---------- SPLASH CONTENT ---------- */
-    .logo { max-width: min(80vw, 600px); transition: transform .9s ease; }
+    .logo { max-width: min(80vw, 600px); }
     #splash-logo { width: 600px; }
 
     /* ---------- MAIN LAYOUT ---------- */
@@ -102,127 +107,92 @@
     }
     .headline{
       font-size: clamp(28px, 4.6vw, 56px);
-      font-weight: 800;
-      letter-spacing: .5px;
-      text-align: center;
-      color: #000;
+      font-weight: 800; letter-spacing: .5px; text-align: center; color: #000;
     }
 
     .brand-grid{
       width: 100%;
       display: grid;
       grid-template-columns: repeat(2, minmax(280px, 1fr));
-      gap: clamp(18px, 3vw, 30px);
+      gap: clamp(18px, 3vw, 28px);
       align-items: stretch;
     }
-    @media (max-width: 840px){
-      .brand-grid{ grid-template-columns: 1fr; }
-    }
+    @media (max-width: 840px){ .brand-grid{ grid-template-columns: 1fr; } }
 
-    /* ---------- NEW CARD STYLE (clear glass, bigger logos) ---------- */
+    /* ---------- NEW CARD: minimal chrome, big logos, fully clickable ---------- */
     .card {
-      --blur: 12px; /* lower blur to avoid fog */
       position: relative;
-      border-radius: 22px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)),
-        rgba(255,255,255,.10);
-      -webkit-backdrop-filter: saturate(200%) blur(var(--blur));
-              backdrop-filter: saturate(200%) blur(var(--blur));
+      border-radius: 20px;
+      background: rgba(255,255,255,.06); /* very clear */
+      -webkit-backdrop-filter: blur(6px) saturate(180%);
+              backdrop-filter: blur(6px) saturate(180%);
       border: 1px solid rgba(0,0,0,.12);
-      outline: 1px solid rgba(255,255,255,.36);
+      outline: 1px solid rgba(255,255,255,.38);
       box-shadow:
-        0 18px 40px rgba(0,0,0,.10),
+        0 16px 36px rgba(0,0,0,.10),
         0 2px 10px rgba(0,0,0,.06);
-      transition: transform .35s cubic-bezier(.2,.8,.2,1),
-                  box-shadow .35s ease,
-                  background .25s ease,
+      transition: transform .28s cubic-bezier(.2,.8,.2,1),
+                  box-shadow .28s ease,
                   outline-color .25s ease,
                   border-color .25s ease;
-      will-change: transform, box-shadow;
-      overflow: clip;
+      display: grid; place-items: center;
+      padding: clamp(14px, 2.6vw, 20px); /* tighter shell so logo dominates */
     }
     .card:hover{
-      transform: translateY(-6px) scale(1.01);
+      transform: translateY(-4px);
       box-shadow:
-        0 26px 60px rgba(0,0,0,.14),
-        0 10px 24px rgba(0,0,0,.10);
-      border-color: rgba(0,0,0,.18);
-      outline-color: rgba(255,255,255,.46);
+        0 22px 52px rgba(0,0,0,.14),
+        0 8px 20px rgba(0,0,0,.10);
+      border-color: rgba(0,0,0,.16);
+      outline-color: rgba(255,255,255,.48);
     }
     .card:focus-within{
       outline: 2px solid rgba(28,100,242,.35);
       box-shadow:
-        0 26px 60px rgba(0,0,0,.14),
+        0 22px 52px rgba(0,0,0,.14),
         0 0 0 6px rgba(28,100,242,.12);
     }
 
     .card-body{
-      position: relative;
-      display: grid;
-      justify-items: center;
-      text-align: center;
-      gap: 10px;
-      padding: clamp(18px, 3vw, 28px);
-      pointer-events: auto; /* ensure children receive clicks */
+      display: grid; justify-items: center; text-align: center;
+      gap: 10px; width: 100%;
     }
 
+    /* Make logos the hero */
+    .brand-link { display: inline-block; line-height: 0; }
     .brand-logo{
-      width: min(520px, 78%);
-      max-height: 160px;
-      height: auto;
-      object-fit: contain; object-position: center;
+      width: 88%; max-width: 560px; max-height: 220px;
+      height: auto; object-fit: contain; object-position: center;
       image-rendering: -webkit-optimize-contrast;
       filter: drop-shadow(0 1px 0 rgba(255,255,255,.35));
-      transition: transform .35s ease;
     }
-    .card:hover .brand-logo{ transform: translateY(-2px); }
 
     .subtext{
       margin-top: 2px;
       font-size: clamp(14px, 1.6vw, 16px);
       letter-spacing: .3px;
-      color: rgba(0,0,0,.70);
+      color: rgba(0,0,0,.72);
     }
 
-    /* ---------- GLASS CHIP BUTTON (clickable, elevated) ---------- */
+    /* Clickable glass button */
     .cta{
-      margin-top: 10px;
-      position: relative; z-index: 2;
+      margin-top: 8px;
       display: inline-flex; align-items: center; justify-content: center;
-      gap: 8px;
-      padding: 12px 18px;
-      border-radius: 14px;
-      font-weight: 800; letter-spacing: .35px;
-      text-decoration: none;
-      color: #0b0f18;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.55));
-      -webkit-backdrop-filter: saturate(180%) blur(12px);
-              backdrop-filter: saturate(180%) blur(12px);
+      padding: 12px 18px; border-radius: 14px;
+      font-weight: 800; letter-spacing: .35px; text-decoration: none;
+      color: #0b0f18; background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.58));
+      -webkit-backdrop-filter: blur(10px) saturate(160%);
+              backdrop-filter: blur(10px) saturate(160%);
       border: 1px solid rgba(0,0,0,.16);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.85),
-        0 8px 18px rgba(0,0,0,.12);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 8px 18px rgba(0,0,0,.12);
       transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
       cursor: pointer;
+      position: relative; z-index: 1; /* ensure nothing overlays */
+      pointer-events: auto;
     }
-    .cta:hover{
-      transform: translateY(-1px);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.9),
-        0 12px 26px rgba(0,0,0,.16);
-    }
-    .cta:active{
-      transform: translateY(0);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.85),
-        0 6px 14px rgba(0,0,0,.10);
-    }
-    .cta:focus-visible{
-      outline: 2px solid rgba(28,100,242,.55);
-      outline-offset: 2px;
-    }
+    .cta:hover{ transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.92), 0 12px 26px rgba(0,0,0,.16); }
+    .cta:active{ transform: translateY(0); box-shadow: inset 0 1px 0 rgba(255,255,255,.88), 0 6px 14px rgba(0,0,0,.10); }
+    .cta:focus-visible{ outline: 2px solid rgba(28,100,242,.55); outline-offset: 2px; }
 
     .divider{
       height: 1px; width: 100%;
@@ -233,8 +203,8 @@
     .bsmc-logo{
       width: min(520px, 72vw); height: auto; display: block;
       object-fit: contain; object-position: center;
-      margin-top: clamp(6px, 1.5vw, 10px);
       filter: drop-shadow(0 1px 0 rgba(255,255,255,.4));
+      margin-top: clamp(6px, 1.5vw, 10px);
     }
     .footer-text{
       font-size: clamp(13px, 1.6vw, 15px);
@@ -242,57 +212,62 @@
       text-align: center;
     }
 
-    /* Accessibility prefs */
+    /* Prefs */
     @media (prefers-reduced-transparency: reduce) {
-      .panel, .card, .cta {
-        -webkit-backdrop-filter: none; backdrop-filter: none;
-        background: rgba(255,255,255,.12);
-      }
+      .panel, .card, .cta { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(255,255,255,.12); }
     }
     @media (prefers-reduced-motion: reduce) {
-      .panel, .logo, .card, .cta, .screen { transition: none !important; }
+      .screen, .card, .cta { transition: none !important; }
     }
-
-    /* Fallback if backdrop-filter unsupported */
     @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-      .panel {
-        background:
-          linear-gradient(to bottom, rgba(255,255,255,.10), rgba(255,255,255,0)),
-          rgba(24,26,27,.18);
-      }
-      .card{
-        background:
-          linear-gradient(to bottom, rgba(255,255,255,.12), rgba(255,255,255,.06)),
-          rgba(255,255,255,.12);
-      }
-      .cta{ background: rgba(255,255,255,.90); }
+      .panel { background: rgba(255,255,255,.08); }
+      .card  { background: rgba(255,255,255,.12); }
+      .cta   { background: rgba(255,255,255,.92); }
     }
   </style>
 </head>
 <body>
 
-  <!-- SPLASH: deep black + subtle animated white shimmer -->
+  <!-- SPLASH: deep black + pronounced white shimmer -->
   <div class="splash-bg" aria-hidden="true"></div>
+
+  <!-- Shimmer layer A -->
   <svg class="splash-shimmer" aria-hidden="true">
-    <filter id="shimmer">
-      <feTurbulence type="fractalNoise" baseFrequency="0.003 0.007" numOctaves="2" seed="3">
-        <animate attributeName="baseFrequency" dur="16s" values="0.003 0.007; 0.002 0.006; 0.003 0.007" repeatCount="indefinite"/>
+    <filter id="shimmerA">
+      <feTurbulence type="fractalNoise" baseFrequency="0.0025 0.006" numOctaves="2" seed="7">
+        <animate attributeName="baseFrequency" dur="14s" values="0.0025 0.006; 0.0018 0.005; 0.0025 0.006" repeatCount="indefinite"/>
       </feTurbulence>
+      <feGaussianBlur stdDeviation="1.2"/>
       <feColorMatrix type="matrix" values="
         1 0 0 0 0
         0 1 0 0 0
         0 0 1 0 0
-        0 0 0 0.6 0"/>
+        0 0 0 .9 0"/>
     </filter>
-    <rect width="100%" height="100%" filter="url(#shimmer)" fill="#ffffff"/>
+    <rect width="100%" height="100%" filter="url(#shimmerA)" fill="#fff"/>
+  </svg>
+
+  <!-- Shimmer layer B (different phase/scale) -->
+  <svg class="splash-shimmer-2" aria-hidden="true">
+    <filter id="shimmerB">
+      <feTurbulence type="turbulence" baseFrequency="0.0016 0.004" numOctaves="3" seed="13">
+        <animate attributeName="seed" dur="18s" values="13; 25; 13" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feGaussianBlur stdDeviation="0.8"/>
+      <feColorMatrix type="matrix" values="
+        1 0 0 0 0
+        0 1 0 0 0
+        0 0 1 0 0
+        0 0 0 .8 0"/>
+    </filter>
+    <rect width="100%" height="100%" filter="url(#shimmerB)" fill="#fff"/>
   </svg>
 
   <!-- Splash Screen -->
   <div id="splash" class="screen">
-    <div class="panel" id="splash-panel">
-      <span class="sheen"></span>
-      <div class="stack" style="display:grid;place-items:center;">
-        <img id="splash-logo" class="logo" src="BigSkyMusic_white_transparent.png" alt="Big Sky Music Logo (White)" />
+    <div class="panel" id="splash-panel" aria-label="Big Sky Music Company">
+      <div style="display:grid;place-items:center;">
+        <img id="splash-logo" class="logo" src="BigSkyMusic_white_transparent.png" alt="Big Sky Music Company logo (white)" />
       </div>
     </div>
   </div>
@@ -300,133 +275,46 @@
   <!-- Main Screen -->
   <div id="main" class="screen" aria-labelledby="headline">
     <div class="main-wrap">
-      <h1 id="headline" class="headline">Our Family of Brands</h1>
+      <h1 id="headline" class="headline">Our Brands</h1>
 
-      <!-- Cards -->
       <div class="brand-grid">
-
-        <!-- LeydaMusic -->
-        <div class="card" id="card-leydamusic" style="--blur:12px;">
-          <span class="sheen" aria-hidden="true"></span>
+        <!-- LeydaMusic: image and button BOTH open site -->
+        <div class="card" id="card-leydamusic">
           <div class="card-body">
-            <img class="brand-logo" src="leydamusic.png" alt="LeydaMusic logo" />
+            <a class="brand-link" href="https://leydamusic.com" target="_blank" rel="noopener" aria-label="Open LeydaMusic website">
+              <img class="brand-logo" src="leydamusic.png" alt="LeydaMusic" />
+            </a>
             <div class="subtext">Music for the Marching Arts</div>
             <a class="cta" href="https://leydamusic.com" target="_blank" rel="noopener">Visit site</a>
           </div>
         </div>
 
-        <!-- forComposers -->
-        <div class="card" id="card-forcomposers" style="--blur:12px;">
-          <span class="sheen" aria-hidden="true"></span>
+        <!-- forComposers: no button per request -->
+        <div class="card" id="card-forcomposers">
           <div class="card-body">
-            <img class="brand-logo" src="forcomposers.png" alt="forComposers logo" />
+            <span class="brand-link" aria-hidden="true">
+              <img class="brand-logo" src="forcomposers.png" alt="forComposers" />
+            </span>
             <div class="subtext">Coming in Spring 2027</div>
-            <!-- intentionally no button -->
           </div>
         </div>
       </div>
 
       <div class="divider" aria-hidden="true"></div>
 
-      <!-- Big Sky logo (black) + footer -->
-      <img class="bsmc-logo" src="BigSkyMusic_black_transparent.png" alt="Big Sky Music Company logo (Black)" />
+      <img class="bsmc-logo" src="BigSkyMusic_transparent.png" alt="Big Sky Music Company logo" />
       <div class="footer-text">Companies Owned and Operated by Big Sky Music Company, LLC</div>
     </div>
   </div>
 
   <script>
-    // ------- Screen transition (faster & smoother) -------
+    /* Faster splash -> main */
     setTimeout(() => {
       document.getElementById("splash").style.opacity = 0;
-      setTimeout(() => {
-        const main = document.getElementById("main");
-        main.style.opacity = 1;
-      }, 1200);
-    }, 3200);
+      setTimeout(() => { document.getElementById("main").style.opacity = 1; }, 900);
+    }, 2600);
 
-    // ------- Fluid pointer tracker with inertia (for splash panel + cards) -------
-    (function(){
-      const panels = [
-        document.getElementById('splash-panel'),
-        document.getElementById('card-leydamusic'),
-        document.getElementById('card-forcomposers')
-      ];
-
-      let targetX = 0.6, targetY = 0.15;  // normalized 0..1
-      let curX = targetX, curY = targetY;
-      let rafId = null;
-
-      function onPointerMove(e) {
-        const el = e.currentTarget;
-        const r = el.getBoundingClientRect();
-        targetX = (e.clientX - r.left) / r.width;
-        targetY = (e.clientY - r.top) / r.height;
-        if (!rafId) rafId = requestAnimationFrame(tick);
-      }
-
-      function tick(){
-        const k = 0.14;
-        curX += (targetX - curX) * k;
-        curY += (targetY - curY) * k;
-
-        for (const el of panels) {
-          if (!el) continue;
-          const mx = (curX * 100).toFixed(2) + '%';
-          const my = (curY * 100).toFixed(2) + '%';
-          el.style.setProperty('--mx', mx);
-          el.style.setProperty('--my', my);
-
-          const tiltX = (0.5 - curY) * 5.5;
-          const tiltY = (curX - 0.5) * 5.5;
-          el.style.transform =
-            'perspective(900px) ' +
-            'rotateX(' + tiltX.toFixed(2) + 'deg) ' +
-            'rotateY(' + tiltY.toFixed(2) + 'deg)';
-        }
-
-        if (Math.abs(targetX - curX) > 0.0005 || Math.abs(targetY - curY) > 0.0005) {
-          rafId = requestAnimationFrame(tick);
-        } else {
-          rafId = null;
-        }
-      }
-
-      for (const el of panels) {
-        if (!el) continue;
-        el.addEventListener('pointermove', onPointerMove);
-        el.style.setProperty('--mx', '60%');
-        el.style.setProperty('--my', '15%');
-      }
-
-      for (const el of panels) {
-        if (!el) continue;
-        el.addEventListener('touchmove', (e) => {
-          const t = e.touches[0];
-          if (!t) return;
-          const r = el.getBoundingClientRect();
-          targetX = (t.clientX - r.left) / r.width;
-          targetY = (t.clientY - r.top) / r.height;
-          if (!rafId) rafId = requestAnimationFrame(tick);
-        }, { passive: true });
-      }
-
-      for (const el of panels) {
-        if (!el) continue;
-        el.addEventListener('pointerleave', () => {
-          targetX = 0.6; targetY = 0.15;
-          if (!rafId) rafId = requestAnimationFrame(tick);
-        });
-      }
-    })();
-
-    // Safety: ensure no overlay captures clicks on buttons
-    // (sheen and pseudo-elements already pointer-events:none)
-    // but this guarantees the anchor stays on top.
-    document.querySelectorAll('.cta').forEach(a=>{
-      a.style.pointerEvents = 'auto';
-      a.style.zIndex = '2';
-      a.addEventListener('click', ()=>{}); // noop to assert click binding
-    });
+    /* Removed mouse-tracking effect entirely for perfect stability and zero lag. */
   </script>
 </body>
 </html>
