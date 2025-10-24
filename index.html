@@ -24,96 +24,81 @@
       overflow: hidden;
     }
 
-    /* Scene background to give the glass something to blur (for splash) */
-    .scene {
+    /* ---------- SPLASH (deeper black with subtle white shimmer) ---------- */
+    .splash-bg {
+      position: fixed; inset: 0; z-index: 0;
+      background: #000;
+    }
+    /* White shimmer via SVG turbulence, extremely subtle */
+    .splash-shimmer {
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background:
-        radial-gradient(1200px 800px at 10% 10%, #2447b8 0, transparent 55%),
-        radial-gradient(900px 700px at 90% 20%, #7e3ff2 0, transparent 55%),
-        radial-gradient(900px 700px at 40% 100%, #1fb6ff 0, transparent 55%),
-        linear-gradient(135deg, #000, #0b0f18);
-      transform: translateZ(0);
+      opacity: .06; /* keep this very low */
+      filter: contrast(130%) brightness(120%);
+      mix-blend-mode: screen;
     }
 
-    /* Shared screen container */
+    /* ---------- SCREEN LAYERS ---------- */
     .screen {
       position: absolute; inset: 0; z-index: 1;
       display: grid; place-items: center;
-      opacity: 0; transition: opacity 1.8s ease;
+      opacity: 0; transition: opacity 1.4s ease;
     }
-    #splash { background: transparent; z-index: 2; opacity: 1; }
-
-    /* MAIN screen: white base + ultra-subtle texture so blur reads cleanly */
+    #splash { z-index: 2; opacity: 1; }
     #main   { background: #fff; color: #000; z-index: 1; }
     #main::before{
+      /* ultra-subtle texture so glass blur has something to catch on */
       content:""; position: absolute; inset:0; z-index:0; pointer-events:none;
-      /* a faint, elegant ink-like field for the glass to blur */
       background:
-        radial-gradient(800px 600px at 20% 20%, rgba(0,0,0,.06), transparent 60%),
-        radial-gradient(900px 700px at 80% 30%, rgba(0,0,0,.05), transparent 65%),
+        radial-gradient(800px 600px at 20% 20%, rgba(0,0,0,.05), transparent 60%),
+        radial-gradient(900px 700px at 80% 30%, rgba(0,0,0,.04), transparent 65%),
         radial-gradient(900px 700px at 40% 90%, rgba(0,0,0,.04), transparent 65%),
-        linear-gradient(#fff, #fff);
-      filter: blur(0.2px); /* tiny bit of grain */
+        #fff;
     }
 
-    /* Generic glass panel (used for splash + card shells on main) */
+    /* ---------- BASE GLASS PANEL (used on splash only) ---------- */
     .panel {
       position: relative;
       border-radius: 20px;
       padding: clamp(24px, 4vw, 40px);
-      /* Lighter, clearer glass: less fog, more edge */
       background:
         linear-gradient(to bottom, rgba(255,255,255,.10), rgba(255,255,255,0)),
-        rgba(24,26,27,.18);
+        rgba(20,20,22,.18);
       -webkit-backdrop-filter: saturate(160%) blur(var(--blur, 20px));
               backdrop-filter: saturate(160%) blur(var(--blur, 20px));
       border: 1px solid rgba(255,255,255,.35);
-      box-shadow:
-        0 10px 28px rgba(0,0,0,.18),
-        0 2px 10px rgba(0,0,0,.10);
+      box-shadow: 0 10px 28px rgba(0,0,0,.18), 0 2px 10px rgba(0,0,0,.10);
       transform-style: preserve-3d;
-      will-change: transform, backdrop-filter;
       overflow: clip;
     }
-
-    /* Inner stroke + top edge highlight for realism */
     .panel::before,
     .panel::after {
       content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
     }
-    .panel::before {
-      background: linear-gradient(to bottom, rgba(255,255,255,.45), transparent 40%);
-      mix-blend-mode: screen;
-      opacity: .55;
-    }
-    .panel::after {
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.50);
-      opacity: .85;
-    }
+    .panel::before { background: linear-gradient(to bottom, rgba(255,255,255,.45), transparent 40%); mix-blend-mode: screen; opacity: .55; }
+    .panel::after  { box-shadow: inset 0 0 0 1px rgba(255,255,255,.50); opacity: .85; }
 
-    /* Sheen that follows the pointer */
+    /* Pointer-follow sheen (never blocks clicks) */
     .sheen {
       position: absolute; inset: -20%;
-      background:
-        radial-gradient(140px 100px at var(--mx,70%) var(--my,10%),
-          rgba(255,255,255,.45), transparent 60%);
+      background: radial-gradient(140px 100px at var(--mx,70%) var(--my,10%), rgba(255,255,255,.45), transparent 60%);
       filter: blur(18px);
       opacity: .18; pointer-events: none;
       transition: opacity .25s ease;
       will-change: transform, opacity;
     }
-    .panel:hover .sheen { opacity: .3; }
+    .panel:hover .sheen { opacity: .28; }
 
-    /* Logos and text for splash */
+    /* ---------- SPLASH CONTENT ---------- */
     .logo { max-width: min(80vw, 600px); transition: transform .9s ease; }
     #splash-logo { width: 600px; }
 
-    /* MAIN layout */
+    /* ---------- MAIN LAYOUT ---------- */
     .main-wrap{
       position: relative; z-index: 1;
       display: grid; place-items: center;
-      width: min(1200px, 92vw);
-      gap: clamp(16px, 3vw, 28px);
+      width: min(1100px, 92vw);
+      gap: clamp(18px, 3vw, 28px);
+      padding: clamp(16px, 3vw, 24px) 0;
     }
     .headline{
       font-size: clamp(28px, 4.6vw, 56px);
@@ -127,80 +112,117 @@
       width: 100%;
       display: grid;
       grid-template-columns: repeat(2, minmax(280px, 1fr));
-      gap: clamp(16px, 3vw, 32px);
+      gap: clamp(18px, 3vw, 30px);
       align-items: stretch;
     }
-    @media (max-width: 820px){
+    @media (max-width: 840px){
       .brand-grid{ grid-template-columns: 1fr; }
     }
 
-    .card{
-      --blur: 22px; /* a touch more blur on the cards themselves */
+    /* ---------- NEW CARD STYLE (clear glass, bigger logos) ---------- */
+    .card {
+      --blur: 12px; /* lower blur to avoid fog */
+      position: relative;
+      border-radius: 22px;
       background:
-        linear-gradient(to bottom, rgba(255,255,255,.12), rgba(255,255,255,0)),
-        rgba(255,255,255,.10); /* clearer glass */
-      -webkit-backdrop-filter: saturate(180%) blur(var(--blur));
-              backdrop-filter: saturate(180%) blur(var(--blur));
-      border: 1px solid rgba(0,0,0,.10);
+        linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)),
+        rgba(255,255,255,.10);
+      -webkit-backdrop-filter: saturate(200%) blur(var(--blur));
+              backdrop-filter: saturate(200%) blur(var(--blur));
+      border: 1px solid rgba(0,0,0,.12);
+      outline: 1px solid rgba(255,255,255,.36);
       box-shadow:
-        0 20px 40px rgba(0,0,0,.10),
+        0 18px 40px rgba(0,0,0,.10),
         0 2px 10px rgba(0,0,0,.06);
-      transition: transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .45s ease, background .3s ease, border-color .3s ease;
+      transition: transform .35s cubic-bezier(.2,.8,.2,1),
+                  box-shadow .35s ease,
+                  background .25s ease,
+                  outline-color .25s ease,
+                  border-color .25s ease;
+      will-change: transform, box-shadow;
+      overflow: clip;
     }
     .card:hover{
-      transform: translateY(-6px);
+      transform: translateY(-6px) scale(1.01);
       box-shadow:
-        0 24px 50px rgba(0,0,0,.14),
-        0 6px 18px rgba(0,0,0,.10);
-      border-color: rgba(0,0,0,.16);
+        0 26px 60px rgba(0,0,0,.14),
+        0 10px 24px rgba(0,0,0,.10);
+      border-color: rgba(0,0,0,.18);
+      outline-color: rgba(255,255,255,.46);
+    }
+    .card:focus-within{
+      outline: 2px solid rgba(28,100,242,.35);
+      box-shadow:
+        0 26px 60px rgba(0,0,0,.14),
+        0 0 0 6px rgba(28,100,242,.12);
     }
 
     .card-body{
-      display: grid; place-items: center; text-align: center;
-      gap: 12px;
-    }
-    .brand-logo{
-      width: min(420px, 70%); height: auto; display: block;
-      object-fit: contain; object-position: center;
-      image-rendering: -webkit-optimize-contrast;
-      filter: drop-shadow(0 1px 0 rgba(255,255,255,.3));
-    }
-    .subtext{
-      font-size: clamp(14px, 1.8vw, 16px);
-      letter-spacing: .3px;
-      color: rgba(0,0,0,.72);
+      position: relative;
+      display: grid;
+      justify-items: center;
+      text-align: center;
+      gap: 10px;
+      padding: clamp(18px, 3vw, 28px);
+      pointer-events: auto; /* ensure children receive clicks */
     }
 
+    .brand-logo{
+      width: min(520px, 78%);
+      max-height: 160px;
+      height: auto;
+      object-fit: contain; object-position: center;
+      image-rendering: -webkit-optimize-contrast;
+      filter: drop-shadow(0 1px 0 rgba(255,255,255,.35));
+      transition: transform .35s ease;
+    }
+    .card:hover .brand-logo{ transform: translateY(-2px); }
+
+    .subtext{
+      margin-top: 2px;
+      font-size: clamp(14px, 1.6vw, 16px);
+      letter-spacing: .3px;
+      color: rgba(0,0,0,.70);
+    }
+
+    /* ---------- GLASS CHIP BUTTON (clickable, elevated) ---------- */
     .cta{
-      margin-top: 6px;
-      display: inline-block;
+      margin-top: 10px;
+      position: relative; z-index: 2;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px;
       padding: 12px 18px;
-      border-radius: 12px;
-      font-weight: 800; letter-spacing: .4px;
+      border-radius: 14px;
+      font-weight: 800; letter-spacing: .35px;
       text-decoration: none;
       color: #0b0f18;
       background:
-        linear-gradient(to bottom, rgba(255,255,255,.55), rgba(255,255,255,.35)),
-        rgba(255,255,255,.65);
-      -webkit-backdrop-filter: saturate(180%) blur(16px);
-              backdrop-filter: saturate(180%) blur(16px);
-      border: 1px solid rgba(0,0,0,.14);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.8),
-        0 6px 16px rgba(0,0,0,.10);
-      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
-      will-change: transform;
-    }
-    .cta:hover{
-      transform: translateY(-2px);
+        linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.55));
+      -webkit-backdrop-filter: saturate(180%) blur(12px);
+              backdrop-filter: saturate(180%) blur(12px);
+      border: 1px solid rgba(0,0,0,.16);
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,.85),
-        0 10px 22px rgba(0,0,0,.14);
-      background:
-        linear-gradient(to bottom, rgba(255,255,255,.65), rgba(255,255,255,.45)),
-        rgba(255,255,255,.75);
+        0 8px 18px rgba(0,0,0,.12);
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+      cursor: pointer;
     }
-    .cta:active{ transform: translateY(0); }
+    .cta:hover{
+      transform: translateY(-1px);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.9),
+        0 12px 26px rgba(0,0,0,.16);
+    }
+    .cta:active{
+      transform: translateY(0);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.85),
+        0 6px 14px rgba(0,0,0,.10);
+    }
+    .cta:focus-visible{
+      outline: 2px solid rgba(28,100,242,.55);
+      outline-offset: 2px;
+    }
 
     .divider{
       height: 1px; width: 100%;
@@ -220,7 +242,7 @@
       text-align: center;
     }
 
-    /* Respect user preferences */
+    /* Accessibility prefs */
     @media (prefers-reduced-transparency: reduce) {
       .panel, .card, .cta {
         -webkit-backdrop-filter: none; backdrop-filter: none;
@@ -240,82 +262,89 @@
       }
       .card{
         background:
-          linear-gradient(to bottom, rgba(255,255,255,.12), rgba(255,255,255,0)),
+          linear-gradient(to bottom, rgba(255,255,255,.12), rgba(255,255,255,.06)),
           rgba(255,255,255,.12);
       }
-      .cta{ background: rgba(255,255,255,.85); }
+      .cta{ background: rgba(255,255,255,.90); }
     }
   </style>
 </head>
 <body>
 
-  <!-- Ambient scene (blur source for splash) -->
-  <div class="scene" aria-hidden="true"></div>
+  <!-- SPLASH: deep black + subtle animated white shimmer -->
+  <div class="splash-bg" aria-hidden="true"></div>
+  <svg class="splash-shimmer" aria-hidden="true">
+    <filter id="shimmer">
+      <feTurbulence type="fractalNoise" baseFrequency="0.003 0.007" numOctaves="2" seed="3">
+        <animate attributeName="baseFrequency" dur="16s" values="0.003 0.007; 0.002 0.006; 0.003 0.007" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feColorMatrix type="matrix" values="
+        1 0 0 0 0
+        0 1 0 0 0
+        0 0 1 0 0
+        0 0 0 0.6 0"/>
+    </filter>
+    <rect width="100%" height="100%" filter="url(#shimmer)" fill="#ffffff"/>
+  </svg>
 
-  <!-- Splash Screen (black) -->
+  <!-- Splash Screen -->
   <div id="splash" class="screen">
     <div class="panel" id="splash-panel">
       <span class="sheen"></span>
-      <div class="stack">
+      <div class="stack" style="display:grid;place-items:center;">
         <img id="splash-logo" class="logo" src="BigSkyMusic_white_transparent.png" alt="Big Sky Music Logo (White)" />
       </div>
     </div>
   </div>
 
-  <!-- Main Screen (white) -->
+  <!-- Main Screen -->
   <div id="main" class="screen" aria-labelledby="headline">
     <div class="main-wrap">
-      <!-- Headline -->
       <h1 id="headline" class="headline">Our Family of Brands</h1>
 
       <!-- Cards -->
       <div class="brand-grid">
 
-        <!-- LeydaMusic card (left) -->
-        <div class="panel card" id="card-leydamusic" style="--blur:24px;">
-          <span class="sheen"></span>
+        <!-- LeydaMusic -->
+        <div class="card" id="card-leydamusic" style="--blur:12px;">
+          <span class="sheen" aria-hidden="true"></span>
           <div class="card-body">
-            <!-- Replace filename with your exact asset if different -->
             <img class="brand-logo" src="leydamusic.png" alt="LeydaMusic logo" />
             <div class="subtext">Music for the Marching Arts</div>
             <a class="cta" href="https://leydamusic.com" target="_blank" rel="noopener">Visit site</a>
           </div>
         </div>
 
-        <!-- forComposers card (right) -->
-        <div class="panel card" id="card-forcomposers" style="--blur:24px;">
-          <span class="sheen"></span>
+        <!-- forComposers -->
+        <div class="card" id="card-forcomposers" style="--blur:12px;">
+          <span class="sheen" aria-hidden="true"></span>
           <div class="card-body">
-            <!-- Replace filename with your exact asset if different -->
             <img class="brand-logo" src="forcomposers.png" alt="forComposers logo" />
             <div class="subtext">Coming in Spring 2027</div>
-            <!-- no button by request -->
+            <!-- intentionally no button -->
           </div>
         </div>
       </div>
 
       <div class="divider" aria-hidden="true"></div>
 
-      <!-- Big Sky logo (black version) -->
-      <!-- Replace filename with your exact black logo asset if different -->
+      <!-- Big Sky logo (black) + footer -->
       <img class="bsmc-logo" src="BigSkyMusic_black_transparent.png" alt="Big Sky Music Company logo (Black)" />
-
-      <!-- Footer line -->
       <div class="footer-text">Companies Owned and Operated by Big Sky Music Company, LLC</div>
     </div>
   </div>
 
   <script>
-    // ------- Screen transition -------
+    // ------- Screen transition (faster & smoother) -------
     setTimeout(() => {
       document.getElementById("splash").style.opacity = 0;
       setTimeout(() => {
         const main = document.getElementById("main");
         main.style.opacity = 1;
-      }, 1800);
-    }, 4000);
+      }, 1200);
+    }, 3200);
 
-    // ------- Fluid pointer tracker with inertia (requestAnimationFrame) -------
+    // ------- Fluid pointer tracker with inertia (for splash panel + cards) -------
     (function(){
       const panels = [
         document.getElementById('splash-panel'),
@@ -323,7 +352,7 @@
         document.getElementById('card-forcomposers')
       ];
 
-      let targetX = 0.5, targetY = 0.2;  // normalized 0..1
+      let targetX = 0.6, targetY = 0.15;  // normalized 0..1
       let curX = targetX, curY = targetY;
       let rafId = null;
 
@@ -336,7 +365,7 @@
       }
 
       function tick(){
-        const k = 0.12; // smoothing factor
+        const k = 0.14;
         curX += (targetX - curX) * k;
         curY += (targetY - curY) * k;
 
@@ -347,14 +376,12 @@
           el.style.setProperty('--mx', mx);
           el.style.setProperty('--my', my);
 
-          // Subtle parallax tilt and lift
-          const tiltX = (0.5 - curY) * 6; // degrees
-          const tiltY = (curX - 0.5) * 6; // degrees
+          const tiltX = (0.5 - curY) * 5.5;
+          const tiltY = (curX - 0.5) * 5.5;
           el.style.transform =
             'perspective(900px) ' +
             'rotateX(' + tiltX.toFixed(2) + 'deg) ' +
-            'rotateY(' + tiltY.toFixed(2) + 'deg) ' +
-            'translateZ(0)';
+            'rotateY(' + tiltY.toFixed(2) + 'deg)';
         }
 
         if (Math.abs(targetX - curX) > 0.0005 || Math.abs(targetY - curY) > 0.0005) {
@@ -364,16 +391,13 @@
         }
       }
 
-      // Attach listeners
       for (const el of panels) {
         if (!el) continue;
         el.addEventListener('pointermove', onPointerMove);
-        // Start with a pleasing default highlight
-        el.style.setProperty('--mx', '70%');
-        el.style.setProperty('--my', '10%');
+        el.style.setProperty('--mx', '60%');
+        el.style.setProperty('--my', '15%');
       }
 
-      // Touch support
       for (const el of panels) {
         if (!el) continue;
         el.addEventListener('touchmove', (e) => {
@@ -386,15 +410,23 @@
         }, { passive: true });
       }
 
-      // On leave, glide back
       for (const el of panels) {
         if (!el) continue;
         el.addEventListener('pointerleave', () => {
-          targetX = 0.7; targetY = 0.1;
+          targetX = 0.6; targetY = 0.15;
           if (!rafId) rafId = requestAnimationFrame(tick);
         });
       }
     })();
+
+    // Safety: ensure no overlay captures clicks on buttons
+    // (sheen and pseudo-elements already pointer-events:none)
+    // but this guarantees the anchor stays on top.
+    document.querySelectorAll('.cta').forEach(a=>{
+      a.style.pointerEvents = 'auto';
+      a.style.zIndex = '2';
+      a.addEventListener('click', ()=>{}); // noop to assert click binding
+    });
   </script>
 </body>
 </html>
