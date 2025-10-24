@@ -16,98 +16,229 @@
   <link href="https://fonts.googleapis.com/css2?family=Aspekta:wght@800&display=swap" rel="stylesheet" />
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
+      margin: 0; padding: 0; height: 100%;
       font-family: 'Aspekta', sans-serif;
-      background: black;
-      color: white;
+      background: black; color: white;
       overflow: hidden;
     }
 
+    /* Scene background to give the glass something to blur */
+    .scene {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(1200px 800px at 10% 10%, #2447b8 0, transparent 55%),
+        radial-gradient(900px 700px at 90% 20%, #7e3ff2 0, transparent 55%),
+        radial-gradient(900px 700px at 40% 100%, #1fb6ff 0, transparent 55%),
+        linear-gradient(135deg, #000, #0b0f18);
+      transform: translateZ(0);
+    }
+
+    /* Shared screen container */
     .screen {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      opacity: 0;
-      transition: opacity 2s ease;
+      position: absolute; inset: 0; z-index: 1;
+      display: grid; place-items: center;
+      opacity: 0; transition: opacity 1.8s ease;
+    }
+    #splash { background: transparent; z-index: 2; opacity: 1; }
+    #main   { background: white; color: black; z-index: 1; }
+
+    /* Glass panel wrapping the content */
+    .panel {
+      position: relative;
+      border-radius: 20px;
+      padding: clamp(24px, 4vw, 40px);
+      /* translucent tint + blur */
+      background:
+        linear-gradient(to bottom, rgba(255,255,255,.06), rgba(255,255,255,0)),
+        rgba(24,26,27,.35);
+      -webkit-backdrop-filter: saturate(140%) blur(var(--blur, 24px));
+              backdrop-filter: saturate(140%) blur(var(--blur, 24px));
+      border: 1px solid rgba(255,255,255,.28);
+      box-shadow: 0 10px 28px rgba(0,0,0,.22), 0 2px 10px rgba(0,0,0,.12);
+      transform-style: preserve-3d;
+      will-change: transform, backdrop-filter;
+      overflow: clip;
     }
 
-    #splash {
-      background: black;
-      z-index: 2;
-      opacity: 1;
+    /* Inner stroke + top edge highlight for realism */
+    .panel::before,
+    .panel::after {
+      content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+    }
+    .panel::before {
+      /* inner glossy top edge */
+      background: linear-gradient(to bottom, rgba(255,255,255,.35), transparent 40%);
+      mix-blend-mode: screen;
+      opacity: .55;
+    }
+    .panel::after {
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.45);
+      opacity: .85;
     }
 
-    #main {
-      background: white;
-      color: black;
-      z-index: 1;
+    /* Sheen that follows the pointer */
+    .sheen {
+      position: absolute; inset: -20%;
+      background:
+        radial-gradient(140px 100px at var(--mx,70%) var(--my,10%),
+          rgba(255,255,255,.45), transparent 60%);
+      filter: blur(18px);
+      opacity: .18; pointer-events: none;
+      transition: opacity .25s ease;
+      will-change: transform, opacity;
+    }
+    .panel:hover .sheen { opacity: .28; }
+
+    /* Logos and text */
+    .logo { max-width: min(80vw, 600px); transition: transform .9s ease; }
+    #splash-logo { width: 600px; }
+    #main-logo   { width: 450px; margin-bottom: .5rem; opacity: 0; transition: opacity 1.6s ease; }
+    .coming-text { font-size: 1.8rem; font-weight: 800; letter-spacing: 1px; color: black; opacity: 0; transition: opacity 1.6s ease; }
+
+    /* Layout inside screens */
+    .stack { display: grid; gap: 16px; place-items: center; }
+
+    /* Respect user preferences */
+    @media (prefers-reduced-transparency: reduce) {
+      .panel {
+        -webkit-backdrop-filter: none; backdrop-filter: none;
+        background: rgba(255,255,255,.12);
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .panel, .logo { transition: none !important; }
+      .screen       { transition: none !important; }
     }
 
-    .logo {
-      max-width: 80vw;
-      transition: transform 1s ease;
-    }
-
-    #splash-logo {
-      width: 600px;
-    }
-
-    #main-logo {
-      width: 450px;
-      margin-bottom: 0.5rem;
-      opacity: 0;
-      transition: opacity 2s ease;
-    }
-
-    .coming-text {
-      font-size: 1.8rem;
-      font-weight: 800;
-      letter-spacing: 1px;
-      color: black;
-      opacity: 0;
-      transition: opacity 2s ease;
+    /* Fallback if backdrop-filter unsupported */
+    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+      .panel {
+        background:
+          linear-gradient(to bottom, rgba(255,255,255,.06), rgba(255,255,255,0)),
+          rgba(24,26,27,.28);
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- Splash Screen -->
+  <!-- Ambient scene (blur source) -->
+  <div class="scene" aria-hidden="true"></div>
+
+  <!-- Splash Screen (black) -->
   <div id="splash" class="screen">
-    <img id="splash-logo" class="logo" src="BigSkyMusic_white_transparent.png" alt="Big Sky Music Logo" />
+    <div class="panel" id="splash-panel">
+      <span class="sheen"></span>
+      <div class="stack">
+        <img id="splash-logo" class="logo" src="BigSkyMusic_white_transparent.png" alt="Big Sky Music Logo" />
+      </div>
+    </div>
   </div>
 
-  <!-- Main Screen -->
+  <!-- Main Screen (white) -->
   <div id="main" class="screen">
-    <img id="main-logo" class="logo" src="BigSkyMusic_transparent.png" alt="Big Sky Music Logo" />
-    <div class="coming-text" id="coming-text">Coming January 2026.</div>
+    <div class="panel" id="main-panel" style="--blur:28px;">
+      <span class="sheen"></span>
+      <div class="stack">
+        <img id="main-logo" class="logo" src="BigSkyMusic_transparent.png" alt="Big Sky Music Logo" />
+        <div class="coming-text" id="coming-text">Coming January 2026.</div>
+      </div>
+    </div>
   </div>
 
   <script>
+    // ------- Screen transition (same timing, smoother easing) -------
     setTimeout(() => {
-      // Fade out splash
       document.getElementById("splash").style.opacity = 0;
-
-      // After splash fades out, fade in main content
       setTimeout(() => {
-        document.getElementById("main").style.opacity = 1;
+        const main = document.getElementById("main");
+        main.style.opacity = 1;
         document.getElementById("main-logo").style.opacity = 1;
         document.getElementById("coming-text").style.opacity = 1;
-      }, 2000); // Wait for splash to fade out fully
+      }, 1800);
+    }, 4000);
 
-    }, 4000); // Initial delay before starting transition
+    // ------- Fluid pointer tracker with inertia (requestAnimationFrame) -------
+    (function(){
+      const panels = [document.getElementById('splash-panel'), document.getElementById('main-panel')];
+
+      let targetX = 0.5, targetY = 0.2;  // normalized 0..1
+      let curX = targetX, curY = targetY;
+      let rafId = null;
+
+      function onPointerMove(e) {
+        const el = e.currentTarget;
+        const r = el.getBoundingClientRect();
+        targetX = (e.clientX - r.left) / r.width;
+        targetY = (e.clientY - r.top) / r.height;
+        if (!rafId) rafId = requestAnimationFrame(tick);
+      }
+
+      function tick(){
+        // Lerp toward target for smoothness
+        const k = 0.12; // smoothing factor
+        curX += (targetX - curX) * k;
+        curY += (targetY - curY) * k;
+
+        // Update both panels so the feel is consistent across screens
+        for (const el of panels) {
+          if (!el) continue;
+          const mx = (curX * 100).toFixed(2) + '%';
+          const my = (curY * 100).toFixed(2) + '%';
+          el.style.setProperty('--mx', mx);
+          el.style.setProperty('--my', my);
+
+          // Subtle parallax tilt and lift
+          const tiltX = (0.5 - curY) * 6; // degrees
+          const tiltY = (curX - 0.5) * 6; // degrees
+          el.style.transform =
+            'perspective(900px) ' +
+            'rotateX(' + tiltX.toFixed(2) + 'deg) ' +
+            'rotateY(' + tiltY.toFixed(2) + 'deg) ' +
+            'translateZ(0)';
+        }
+
+        // Continue animating until close to target
+        if (Math.abs(targetX - curX) > 0.0005 || Math.abs(targetY - curY) > 0.0005) {
+          rafId = requestAnimationFrame(tick);
+        } else {
+          rafId = null;
+        }
+      }
+
+      // Attach listeners
+      for (const el of panels) {
+        if (!el) continue;
+        el.addEventListener('pointermove', onPointerMove);
+        // Start with center-ish sheen
+        el.style.setProperty('--mx', '70%');
+        el.style.setProperty('--my', '10%');
+      }
+
+      // Touch support (follow finger)
+      for (const el of panels) {
+        if (!el) continue;
+        el.addEventListener('touchmove', (e) => {
+          const t = e.touches[0];
+          if (!t) return;
+          const r = el.getBoundingClientRect();
+          targetX = (t.clientX - r.left) / r.width;
+          targetY = (t.clientY - r.top) / r.height;
+          if (!rafId) rafId = requestAnimationFrame(tick);
+        }, { passive: true });
+      }
+
+      // On leave, glide back to a pleasing default
+      for (const el of panels) {
+        if (!el) continue;
+        el.addEventListener('pointerleave', () => {
+          targetX = 0.7; targetY = 0.1;
+          if (!rafId) rafId = requestAnimationFrame(tick);
+        });
+      }
+    })();
   </script>
 </body>
 </html>
